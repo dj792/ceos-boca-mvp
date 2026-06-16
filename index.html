@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEOS Boca</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <a class="app-brand" href="./" aria-label="Executive Reporting Platform — Chamber Edition">
+      <img
+        class="app-brand__logo"
+        src="Assets/chambereditiondarklogo.png"
+        alt="Executive Reporting Platform — Chamber Edition by 1 to 100 Advisors, Inc."
+      />
+    </a>
+
+    <header class="app-header">
+      <h1 class="app-title">Members</h1>
+      <p class="app-subtitle" id="app-date"></p>
+    </header>
+
+    <!-- Cards are dropped in here. Each card is its own component module. -->
+    <section id="cards" class="cards">
+      <!-- Member selector card -->
+      <article class="card" id="member-select-card">
+        <header class="card-header">
+          <h2 class="card-title">Select Member</h2>
+        </header>
+        <div class="card-body" id="member-select-mount"></div>
+      </article>
+
+      <!-- Metrics card — at-a-glance KPI tiles (currently mock data) -->
+      <article class="card" id="metrics-card" hidden>
+        <header class="card-header">
+          <h2 class="card-title">Metrics</h2>
+        </header>
+        <div class="card-body" id="metrics-mount"></div>
+      </article>
+
+      <!-- Profile Summary card — collapsible; hidden until a member is selected -->
+      <article class="card" id="profile-summary-card" hidden>
+        <header class="card-header">
+          <div class="card-header__main">
+            <h2 class="card-title">Profile Summary</h2>
+            <span class="card-pill" id="profile-summary-id">ProfileID</span>
+          </div>
+        </header>
+        <div class="card-body" id="profile-summary-mount"></div>
+      </article>
+
+      <!-- Financial Summary card — hidden until a member is selected -->
+      <article class="card" id="financial-summary-card" hidden>
+        <header class="card-header">
+          <h2 class="card-title">Financial Summary</h2>
+        </header>
+        <div class="card-body" id="financial-summary-mount"></div>
+      </article>
+
+      <!-- Paid Invoices card — hidden until a member is selected -->
+      <article class="card" id="paid-invoices-card" hidden>
+        <header class="card-header">
+          <div class="card-header__main">
+            <h2 class="card-title">Paid Invoices</h2>
+            <!-- Filter chip (e.g. "Year 2024 ×") is injected here by paid-invoices.js -->
+          </div>
+        </header>
+        <div class="card-body" id="paid-invoices-mount"></div>
+      </article>
+
+      <!-- Related Profiles card — hidden until a member is selected -->
+      <article class="card" id="related-profiles-card" hidden>
+        <header class="card-header">
+          <h2 class="card-title">Related Profiles</h2>
+        </header>
+        <div class="card-body" id="related-profiles-mount"></div>
+      </article>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

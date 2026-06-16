@@ -1,0 +1,973 @@
+/* CEOS Boca — Apple Stocks–inspired styling
+   Dark background, soft typographic hierarchy, rounded cards. */
+
+:root {
+  --bg: #000000;
+  --bg-elev: #1c1c1e;
+  --bg-elev-2: #2c2c2e;
+  --bg-input: #1c1c1e;
+  --separator: rgba(84, 84, 88, 0.65);
+  --text: #ffffff;
+  --text-secondary: #ebebf599;
+  --text-tertiary: #ebebf54d;
+  --accent: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.18);
+  --green: #30d158;
+  --red: #ff453a;
+  /* Chart category colors */
+  --dues: #0a84ff;       /* matches accent — the "primary" series */
+  --nondues: #64d2ff;    /* Apple system teal — distinct but adjacent */
+  --radius-card: 14px;
+  --radius-input: 10px;
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.app-brand {
+  display: block;
+  padding: 0 4px 24px;
+  /* The logo image already has its own dark background baked in,
+     so it sits flush on the page background. */
+}
+
+.app-brand__logo {
+  display: block;
+  height: auto;
+  width: 100%;
+  max-width: 520px;
+  user-select: none;
+}
+
+.app-header {
+  padding: 8px 4px 20px;
+}
+
+.app-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.app-subtitle {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ---------- Cards ---------- */
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-elev);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  /* Note: no overflow:hidden — the member-select dropdown is an
+     absolutely-positioned child that must escape the card's bounds. */
+}
+
+/* Card variant for cards whose content needs to be clipped to the
+   rounded corners (e.g. images, full-bleed media). Default cards
+   should leave overflow visible so popovers/menus can escape. */
+.card--clipped { overflow: hidden; }
+
+.card--muted .card-body { color: var(--text-secondary); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 6px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.card-pill {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-elev-2);
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-body { padding: 8px 16px 16px; }
+
+/* ---------- Card-wide loading state ---------- */
+/* Components opt in by adding `.card--loading` to the <article> at
+   the start of their async load() and removing it once the data has
+   rendered (or errored). Two cues:
+     • a pulsing accent dot beside the card title
+     • a subtle dim on the card body
+   Both fade in/out smoothly so quick fetches don't flash harshly. */
+
+.card-title::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 0;
+  vertical-align: middle;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 200ms ease, width 200ms ease, margin-left 200ms ease;
+}
+
+.card--loading .card-title::after {
+  width: 8px;
+  margin-left: 8px;
+  opacity: 1;
+  animation: card-loading-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes card-loading-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.1); }
+}
+
+.card-body {
+  transition: opacity 200ms ease;
+}
+.card--loading .card-body {
+  opacity: 0.55;
+}
+
+/* ---------- Collapsible (click-to-open) cards ---------- */
+
+.card--collapsible .card-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 120ms ease;
+}
+
+.card--collapsible .card-header:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.card--collapsible .card-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.card-chevron {
+  margin-left: 8px;
+  color: var(--text-tertiary);
+  font-size: 22px;
+  line-height: 1;
+  display: inline-block;
+  transform-origin: 50% 50%;
+  transition: transform 150ms ease, color 120ms ease;
+}
+
+.card--collapsible .card-header:hover .card-chevron {
+  color: var(--text-secondary);
+}
+
+.card--expanded .card-chevron {
+  transform: rotate(90deg);
+  color: var(--text-secondary);
+}
+
+/* Hide the body when collapsed, and balance the header padding so
+   it doesn't look top-heavy without a body below. */
+.card--collapsed .card-body { display: none; }
+.card--collapsed .card-header { padding-bottom: 14px; }
+
+.placeholder {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+/* ---------- Searchable combobox ---------- */
+
+.combobox {
+  position: relative;
+  width: 100%;
+}
+
+.combobox__input {
+  width: 100%;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-input);
+  font-size: 16px;
+  font-family: inherit;
+  padding: 12px 38px 12px 14px;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.combobox__input::placeholder { color: var(--text-tertiary); }
+
+.combobox__input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.combobox__caret {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.combobox__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-input);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 20;
+  padding: 4px 0;
+  display: none;
+}
+
+.combobox__menu[data-open="true"] { display: block; }
+
+.combobox__option {
+  padding: 10px 14px;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.combobox__option:hover,
+.combobox__option[aria-selected="true"] {
+  background: var(--accent-soft);
+}
+
+.combobox__option-meta {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.combobox__empty {
+  padding: 12px 14px;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+.combobox__status {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  min-height: 1em;
+}
+
+.combobox__status--error { color: var(--red); }
+
+/* ---------- Metrics tiles ---------- */
+
+.metrics-grid {
+  display: grid;
+  /* 150px min lets 5 tiles fit across the 900px-max app on desktop;
+     wraps to 3 / 2 / 1 on narrower viewports. */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  background: var(--bg-elev-2);
+  border-radius: var(--radius-input);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 116px;
+}
+
+.metric__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+}
+
+.metric__value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.metric__sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.metric__sub:empty { display: none; }
+
+.metric__delta {
+  margin-top: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric__delta--up    { color: var(--green); }
+.metric__delta--down  { color: var(--red); }
+.metric__delta--flat  { color: var(--text-tertiary); }
+.metric__delta--neutral { color: var(--text-secondary); }
+
+.metric__delta-arrow {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.metrics-note {
+  margin: 12px 2px 0;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* ---------- Summary list (key/value rows) ---------- */
+
+.summary-list {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--separator);
+}
+
+.summary-row:first-child { border-top: none; }
+
+.summary-label {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+
+.summary-value {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.summary-status {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.summary-status--error { color: var(--red); }
+
+/* ---------- Related profiles grid ---------- */
+
+.related-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.related-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elev-2);
+  border-radius: var(--radius-input);
+  padding: 10px 12px;
+  min-width: 0; /* allow truncation inside flex */
+}
+
+.related-tile__avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.related-tile__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.related-tile__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.related-tile__email {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.related-tile__email:hover { color: var(--accent); }
+
+.related-tile__email--empty {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.related-status {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.related-status--error { color: var(--red); }
+
+/* ---------- Invoices table ---------- */
+
+.invoices-wrap {
+  /* Let the table scroll horizontally on small screens instead of
+     forcing the card to grow. */
+  overflow-x: auto;
+}
+
+.invoices {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.invoices thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  padding: 8px 8px 10px;
+  border-bottom: 1px solid var(--separator);
+}
+
+/* Sort button — inherits the th's typographic styling so it looks
+   like a clickable header rather than a chunky button. */
+.invoices thead .sort-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  line-height: 1;
+}
+.invoices thead .sort-btn:hover { color: var(--text-secondary); }
+.invoices thead .sort-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Right-align the button on numeric / right-aligned columns. */
+.invoices__col-amt .sort-btn,
+.invoices__col-type .sort-btn {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.sort-arrow {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  opacity: 0.55;
+}
+.sort-arrow--active {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.invoices thead th[aria-sort="ascending"],
+.invoices thead th[aria-sort="descending"] {
+  color: var(--text-secondary);
+}
+
+.invoices tbody td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--separator);
+  color: var(--text);
+  vertical-align: top;
+}
+
+.invoices tbody tr:last-child td { border-bottom: none; }
+
+.invoices__col-invoice {
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.invoices__col-item {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Description cells with a tooltip show a small info badge.
+   The whole cell is the hover target — the badge is just visual. */
+.invoices__col-desc[data-has-desc="true"] {
+  cursor: help;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  color: var(--text-tertiary);
+  opacity: 0.65;
+  font-size: 9px;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, "Times New Roman", serif;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1;
+  user-select: none;
+  transition: color 120ms ease, opacity 120ms ease,
+    background-color 120ms ease, transform 120ms ease;
+}
+
+.invoices__col-desc[data-has-desc="true"]:hover .info-icon {
+  color: var(--accent);
+  background: var(--accent-soft);
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.invoices__col-desc {
+  color: var(--text-secondary);
+}
+
+/* Visual hint that the underlying description is empty in the sheet. */
+.invoices__col-desc--missing {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.invoices__col-date {
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.invoices__col-itemnum {
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Invoice group rows ---- */
+
+.invoice-group__gap td {
+  height: 6px;
+  padding: 0;
+  border-bottom: none;
+}
+.invoice-group__gap + .invoice-group__header td {
+  border-top: 1px solid var(--separator);
+}
+
+.invoice-group__header td {
+  background: rgba(255, 255, 255, 0.02);
+  font-weight: 600;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.invoice-group__header .invoices__col-date {
+  color: var(--text);
+}
+
+.invoice-group__total {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-group__item .invoices__col-date,
+.invoice-group__item .invoices__col-invoice {
+  /* dedupe: the group header already shows date + invoice number */
+  border-bottom-color: transparent;
+}
+
+.invoices__col-amt {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.invoices__col-type {
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Type pill — Apple-Stocks-style chip used inside the invoices table. */
+.type-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.type-pill--dues {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.type-pill--nondues {
+  background: var(--bg-elev-2);
+  color: var(--text-secondary);
+}
+
+.invoices-status {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.invoices-status--error { color: var(--red); }
+
+/* ---------- App tooltip (Apple-style floating panel) ---------- */
+/* Singleton at document.body. Positioned via JS by setting left/top
+   to the target cell's top-center; CSS handles the rise + fade. */
+
+.app-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  /* Position above the target: shift up by full height + caret gap.
+     The non-visible state starts a few pixels lower for a "rise" feel. */
+  transform: translate(-50%, calc(-100% - 6px));
+  background: rgba(44, 44, 46, 0.92);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+  padding: 8px 12px;
+  max-width: 280px;
+  width: max-content;
+  white-space: normal;
+  opacity: 0;
+  transition: opacity 80ms ease, transform 100ms ease;
+}
+
+.app-tooltip--visible {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+/* ---------- Financial Summary ---------- */
+
+.fs-legend {
+  display: flex;
+  gap: 16px;
+  padding: 4px 0 10px;
+}
+
+.fs-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.fs-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.fs-legend__swatch--dues { background: var(--dues); }
+.fs-legend__swatch--nondues { background: var(--nondues); }
+
+.fs-chart {
+  margin: 4px 0 16px;
+}
+
+.fs-chart__plot {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 16px;
+  height: 220px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--separator);
+}
+
+.fs-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.fs-col__top {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.fs-col__bar-area {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.fs-col__bar {
+  width: min(64px, 80%);
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+  background: var(--bg-elev-2);
+  /* Subtle entrance — feels native without being flashy. */
+  transition: height 200ms ease;
+}
+
+.fs-col__seg--nondues { background: var(--nondues); }
+.fs-col__seg--dues { background: var(--dues); }
+
+.fs-col__label {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Data grid below the chart */
+.fs-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.fs-grid thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  padding: 8px 8px 10px;
+  border-bottom: 1px solid var(--separator);
+}
+
+.fs-grid thead th.fs-grid__num { text-align: right; }
+
+.fs-grid tbody td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--separator);
+  color: var(--text);
+}
+
+.fs-grid tbody tr:last-child td { border-bottom: none; }
+
+.fs-grid__year {
+  white-space: nowrap;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.fs-grid__num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.fs-grid__num--strong { font-weight: 600; color: var(--text); }
+
+.fs-grid__total-row td {
+  background: rgba(255, 255, 255, 0.02);
+  font-weight: 600;
+  border-top: 1px solid var(--separator);
+}
+
+.fs-status {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.fs-status--error { color: var(--red); }
+
+/* Clickable years — used when Financial Summary has an onYearSelect
+   callback wired up. Both the chart column and the year cell in the
+   grid get the same hover/focus affordance. */
+.fs-col--interactive {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 120ms ease;
+}
+.fs-col--interactive:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+.fs-col--interactive:hover .fs-col__label,
+.fs-col--interactive:focus-visible .fs-col__label {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.fs-col--interactive:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.fs-grid__year--link {
+  cursor: pointer;
+}
+.fs-grid__year--link:hover,
+.fs-grid__year--link:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.fs-grid__year--link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+/* ---------- Filter chip (used in Paid Invoices header) ---------- */
+
+.card-header__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 3px 4px 3px 10px;
+  border-radius: 999px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.filter-chip__label { opacity: 0.8; }
+.filter-chip__value { font-weight: 700; }
+
+.filter-chip__clear {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+  border-radius: 999px;
+}
+.filter-chip__clear:hover {
+  background: rgba(10, 132, 255, 0.22);
+}
+.filter-chip__clear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

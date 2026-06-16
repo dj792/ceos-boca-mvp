@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python (local dev server)
+__pycache__/
+*.pyc
+
+# Logs / scratch
+*.log
+.tmp/
+scratch/
+
+# Local environment / secrets (in case anything is added later)
+.env
+.env.local
+*.local
+
+# Internal / private — not for the public repo
+CLAUDE.md
+docs/architecture.md
