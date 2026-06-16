@@ -32,9 +32,10 @@ export async function fetchSheetRows(tabName, opts = {}) {
     return tabCache.get(cacheKey);
   }
 
+  // A blank tabName reads the workbook's first/default tab.
   const url =
-    `https://docs.google.com/spreadsheets/d/${sheetId}` +
-    `/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tabName)}`;
+    `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv` +
+    (tabName ? `&sheet=${encodeURIComponent(tabName)}` : "");
 
   const res = await fetch(url, { credentials: "omit" });
   if (!res.ok) {
@@ -48,6 +49,51 @@ export async function fetchSheetRows(tabName, opts = {}) {
   const rows = parseCsv(csv);
   tabCache.set(cacheKey, rows);
   return rows;
+}
+
+/**
+ * Authenticate a username / password against the demo login table.
+ *
+ * Login tab (first tab of the auth workbook):
+ *   A (0)  Active
+ *   B (1)  UserName
+ *   C (2)  Name       (display name returned on success)
+ *   D (3)  PW
+ *   E (4)  LastLogin
+ *
+ * Username is matched case-insensitively; password must match exactly.
+ * Returns the matched user's display name on success, or null on a bad
+ * username/password. Throws if the sheet can't be reached (network /
+ * sharing), so the caller can show an error distinct from "wrong
+ * credentials". Swap this for a real auth call when SQL lands.
+ *
+ * @param {string} username
+ * @param {string} password
+ * @returns {Promise<{ name: string, username: string } | null>}
+ */
+export async function authenticate(username, password) {
+  const src = CONFIG.external.auth;
+  const rows = await fetchSheetRows(src.tabName, { sheetId: src.sheetId });
+  if (!rows.length) return null;
+
+  // Skip a header row if column B looks like a "UserName" label.
+  const header = rows[0] || [];
+  const hasHeader =
+    header.length >= 2 && /user|name|login|email/i.test((header[1] || "").trim());
+  const data = hasHeader ? rows.slice(1) : rows;
+
+  const u = String(username).trim().toLowerCase();
+  const p = String(password); // exact match, no trim — passwords are literal
+
+  const row = data.find(
+    (r) => (r[1] || "").trim().toLowerCase() === u && (r[3] || "") === p
+  );
+  if (!row) return null;
+
+  return {
+    name: (row[2] || "").trim() || (row[1] || "").trim(),
+    username: (row[1] || "").trim(),
+  };
 }
 
 /**

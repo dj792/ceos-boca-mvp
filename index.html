@@ -7,14 +7,15 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <main class="app">
-    <a class="app-brand" href="./" aria-label="Executive Reporting Platform — Chamber Edition">
-      <img
-        class="app-brand__logo"
-        src="Assets/chambereditiondarklogo.png"
-        alt="Executive Reporting Platform — Chamber Edition by 1 to 100 Advisors, Inc."
-      />
-    </a>
+  <!-- Login gate. Mounted by app.js; removed once the user signs in. -->
+  <div id="login-overlay" class="login"></div>
+
+  <main class="app" hidden>
+    <img
+      class="app-product-logo"
+      src="brand-kit/ceo-operating-system-dark.svg"
+      alt="CEO Operating System"
+    />
 
     <header class="app-header">
       <h1 class="app-title">Members</h1>

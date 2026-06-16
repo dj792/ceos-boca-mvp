@@ -9,6 +9,7 @@
 //     bar — OR when the user drills in from a year click in Financial
 //     Summary (Paid Invoices only).
 
+import { mountLogin } from "./components/login.js";
 import { mountMemberSelect } from "./components/member-select.js";
 import { mountMetrics } from "./components/metrics.js";
 import { mountProfileSummary } from "./components/profile-summary.js";
@@ -17,6 +18,20 @@ import { mountRelatedProfiles } from "./components/related-profiles.js";
 import { mountPaidInvoices } from "./components/paid-invoices.js";
 import { makeCollapsible } from "./collapsible.js";
 
+// ---------- Login gate ----------
+// Nothing in the app fetches member data until the user signs in.
+// On success we tear down the overlay and reveal the app, then boot
+// the cards. Auth state is in-memory only (a reload re-prompts).
+const overlay = document.getElementById("login-overlay");
+const appMain = document.querySelector("main.app");
+
+mountLogin(overlay, () => {
+  overlay.remove();
+  appMain.hidden = false;
+  startApp();
+});
+
+function startApp() {
 // ---------- Header date (Apple Stocks–style) ----------
 const dateEl = document.getElementById("app-date");
 if (dateEl) {
@@ -99,3 +114,5 @@ function drillIntoYear(year) {
     });
   }
 }
+
+} // end startApp

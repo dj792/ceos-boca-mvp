@@ -32,5 +32,14 @@ export const CONFIG = {
       sheetId: "16YKktGBuKYU0LcLFXYyFTd8UY3SBN-Id8dFoFT5vCZw",
       tabName: "dbo_member",
     },
+
+    // Hardcoded demo login table. Columns:
+    //   A Active  B UserName  C Name  D PW  E LastLogin
+    // tabName left blank → reads the workbook's first tab. Swapped for
+    // a real auth backend (SQL) later.
+    auth: {
+      sheetId: "1J7Tj5O8Bqn7t5kRGLEdoru-cL6s1BFw9a8iJJonN4z8",
+      tabName: "",
+    },
   },
 };
